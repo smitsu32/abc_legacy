@@ -1,5 +1,5 @@
 # abc_legacy
-ABCの回答を管理するリポジトリ
+ABCの過去回答を管理するリポジトリ
 # VSCodeとGitHubの紐づけ
 1. gitインストール（portableじゃない方）、Git Bashにて
    ` git config --global user.name , user.email `
