@@ -8,7 +8,7 @@ p,q,r,s=map(int,input().split())
 for i in range(p,q+1):
     ans=['.']*(s-r+1)
     for j in range(r,s+1):
-        if i==j+(a-b) or i==-j+(a+b):   # ij平面で直線の式(j=(+-ai)+b)をたてる
+        if i==j+(a-b) or i==-j+(a+b):   # ij平面で直線の式(j=(+-ai)+(b-(+-a))をたてる
             ans[j-r]='#'
     print(''.join(ans))
 
