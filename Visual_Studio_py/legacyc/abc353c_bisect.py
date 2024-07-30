@@ -9,7 +9,7 @@ for i in range(n):
     ci=bileft(a,r-a[i])     #a=[1 50000001 50000002 50000003],i=1ならci=1, count=3 (後で1引く)
     count+=n-ci
     
-    if 2*a[i]>=r:
+    if 2*a[i]>=r:           # 同数重複削除
         count-=1 # 50000001+50000001が重複している
 
 count=count//2              # countは２倍カウントしている[1 50000001][50000001,1]
