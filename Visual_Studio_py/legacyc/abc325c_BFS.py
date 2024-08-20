@@ -1,3 +1,4 @@
+# Sensors
 from collections import deque
 
 def ne(i,j):        # '#'の隣接マスを返し、'#'の場合BFS
