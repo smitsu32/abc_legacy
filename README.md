@@ -20,5 +20,5 @@ ABCでの自分の過去回答を管理するリポジトリ
    プッシュ -> ローカルからリモートへ
 
 ## .gitignoreが認識されないとき
-1. BashかPowershellに以下のコードを入力してキャッシュを削除
+1. BashかPowershellに以下のコードを入力してキャッシュを削除 <br>
    `git rm --cashed file.name`
