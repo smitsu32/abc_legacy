@@ -7,3 +7,5 @@ for i in range(n-1):
     b[i]+=r[i]*x
     r[i+1]=r[i]+b[i]
     b[i+1]=b[i]*y
+
+print(b[-1])
