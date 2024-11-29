@@ -1,16 +1,17 @@
-function gitpush(commitMessage)
-%GITPUSH この関数の概要をここに記述
+function gitpush()
+% GITPUSH この関数の概要をここに記述
 %   詳細説明をここに記述
-% コミットメッセージを生成
-% commitMessage = sprintf('コミットメッセージを入力: "%s"', commitMessage);
-% pushRepository = sprintf('ブランチ名(main:1,branch:2):"%s"', pushRepository);
 
 % ステージング
 system('git add .');
 
-% コミット
-system(['git commit -m ' commitMessage]);
+% コミットメッセージの取得
+commitMessage = input('Enter commit message: ', 's');
+pushBranch = input('Enter branch name: ', 's');
+
+% コミット（メッセージにスペースが含まれる場合に対応するため、シングルクォートで囲む）
+system(['git commit -m "' commitMessage '"']);
 
 % プッシュ
-system('git push origin main') % ブランチ名がmainの場合、適宜変更してください
+system(['git push origin "' pushBranch '"']); 
 end
