@@ -3,5 +3,6 @@ function gitpull()
 %   詳細説明をここに記述
 system('git fetch')
 system('git pull')
+fprintf('全ての変更をプルしました\n')
 end
 

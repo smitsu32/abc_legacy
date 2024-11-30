@@ -14,5 +14,5 @@ system(['git commit -m "' commitMessage '"']);
 
 % プッシュ
 system(['git push origin "' pushBranch '"']); 
-fprintf('origin/%s に全ての変更をpushしました',pushBranch);
+fprintf('origin/%s に全ての変更をpushしました\n',pushBranch);
 end
