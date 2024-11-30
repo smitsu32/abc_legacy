@@ -3,5 +3,6 @@ function  addpath()
 %   詳細説明をここに記述
     currentFolder=pwd;
     addpath(genpath(currentFolder));
-    fprintf(['%s をパスに追加しました\n',currentFolder]);
+    fprintf('%s をパスに追加しました\n', currentFolder);
+
 end
