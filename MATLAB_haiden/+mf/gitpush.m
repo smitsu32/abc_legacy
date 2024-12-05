@@ -1,7 +1,6 @@
 function gitpush()
 % GITPUSH この関数の概要をここに記述
 %   詳細説明をここに記述
-% 現在の警告状態を保存
 warning('off', 'all');
 % ステージング
 system('git add .');
@@ -16,4 +15,5 @@ system(['git commit -m "' commitMessage '"']);
 % プッシュ
 system(['git push origin "' pushBranch '"']); 
 fprintf('origin/%s に全ての変更をpushしました\n',pushBranch);
+warning('on', 'all');
 end
