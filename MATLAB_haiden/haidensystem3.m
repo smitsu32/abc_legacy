@@ -17,7 +17,7 @@ nNode=height(Nodes);
 nBr=height(Edges);
 nSvr=height(Edges)-sum(cellfun(@isempty,Edges.SVR));
 
-Charger=struct('Smax',10000,'ind',[]);
+Charger=struct('Smax',10000,'Emax',10000,'ind',[]);
 Svr=struct('nTap',9,'defTap',5,'dVTap',75); %V
 Lrt=struct('nTap',21,'defTap',11,'dVTap',30);
 % nLrt=1;
@@ -67,7 +67,7 @@ charQInj = optimvar ('charQInj',Opt.nTime,nCharger,'Type','continuous'...
     ,'LowerBound',-Charger.Smax.*ones(Opt.nTime,nCharger),'UpperBound',Charger.Smax.*ones(Opt.nTime,nCharger));
 charQInj.UpperBound(1,:)= 0;
 
-%ばいなり（１：充電、０：放電）
+%ばいなり（１：放電、０：充電）
 charPDchU = optimvar ('charPDchU',Opt.nTime,nCharger,'Type','integer'...
     ,'LowerBound',zeros(Opt.nTime,nCharger),'UpperBound',ones(Opt.nTime,nCharger));
 
@@ -78,6 +78,10 @@ Q = optimvar('Q', Opt.nTime, nNode,'Type','continuous',...
     'LowerBound', -inf(Opt.nTime, nNode), 'UpperBound', inf(Opt.nTime, nNode)); % 無効電力
 V = optimvar('V', Opt.nTime, nNode,'Type','continuous',...
     'LowerBound', 1*ones(Opt.nTime, nNode), 'UpperBound', 1*ones(Opt.nTime, nNode));   % 電圧
+
+
+
+
 
 %目的関数
 alpha=0.625;
@@ -119,6 +123,7 @@ Qdemini = zeros(1, nNode);
 isChargerNode = ismember(1:nNode, Charger.ind);
 
 for i = 1:nNode
+    disp(i)
     % ノードデータから Pdem, Qdem を取得
     Pdem = Nodes.dataTT{i, 1}.phasePr; % Pdemを取得
     Qdem = Nodes.dataTT{i, 1}.phaseQr; % Qdemを取得
@@ -151,7 +156,6 @@ end
 %・潮流方程式
 %一次のテイラー展開で線形近似する（精度は怪しいが...）
 
-
 %
 %Y行列拡張(n*1→n*n)
 [NodeAdm_YRe, NodeAdm_YIm] = nodeadm(Edges.YRe, Edges.YIm, Systemdata, nNode, nBr);
@@ -166,14 +170,14 @@ tap_LRT0 = Lrt.defTap * ones(1, nNode); % 初期値（LRTタップ）[tap11] (1�
 tap_SVR0 = 0 * ones(1, nNode); % 初期値（SVRタップ）[tap1] (1×nNode)
 
 % 時間軸に合わせて拡張
-LrtTap_expanded = repmat(LrtTap', nNode, diffInterval)';  % (nTime, nNode)
-SvrTap_expanded = repmat(SvrTap', nNode, diffInterval)';  % (nTime, nNode)
+LrtTap_expanded = repmat(LrtTap', 1, diffInterval);  % (nTime, 1)
+SvrTap_expanded = repmat(SvrTap', 1, diffInterval);  % (nTime, nSvr)
 
-P0_expanded = repmat(P0, nTime, 1); % (nTime, nNode)
-Q0_expanded = repmat(Q0, nTime, 1); % (nTime, nNode)
-V0_expanded = repmat(V0, nTime, 1); % (nTime, nNode)
-tap_LRT0_expanded = repmat(tap_LRT0, nTime, 1);  % (nTime, nNode)
-tap_SVR0_expanded = repmat(tap_SVR0, nTime, 1);  % (nTime, nNode)
+P0_expanded = repmat(P0, Opt.nTime, 1); % (nTime, nNode)
+Q0_expanded = repmat(Q0, Opt.nTime, 1); % (nTime, nNode)
+V0_expanded = repmat(V0, Opt.nTime, 1); % (nTime, nNode)
+tap_LRT0_expanded = repmat(tap_LRT0, Opt.nTime, 1);  % (nTime, nNode)
+tap_SVR0_expanded = repmat(tap_SVR0, Opt.nTime, 1);  % (nTime, nNode)
 
 % アドミタンス行列の準備
 YRe = NodeAdm.YRe; % 実部 (nNode, nNode)
@@ -205,7 +209,8 @@ h_linear = @(P, Q, V, LrtTap, SvrTap) ...
     grad_h_0_tap_SVR .* (SvrTap - tap_SVR0_expanded);
 
 % インピーダンスによる影響を潮流方程式に組み込む（線形化）
-for i = 1:nTime
+for t = 1:Opt.nTime
+    disp(t)
     for j = 1:nNode
         % ノード間の電力フロー計算（インピーダンス考慮）
         P_ij = 0;
@@ -213,22 +218,50 @@ for i = 1:nTime
         
         for k = 1:nNode
             % 電圧差とアドミタンスの積を用いた線形近似（電圧の差の線形近似）
-            deltaV = V(i,j) - V(i,k); % 電圧差
+            deltaV = V(t,j) - V(t,k); % 電圧差
             % 電力の計算（線形化）
             P_ij = P_ij + (real(Y(j, k)) * deltaV);  % (j, k) の位置を修正
             Q_ij = Q_ij + (imag(Y(j, k)) * deltaV);  % (j, k) の位置を修正
         end
         
         % 潮流方程式を追加（次元に注意）
-        prob.Constraints.(['flow_constraint_P_' num2str(i) '_' num2str(j)]) = ...
-            P(i, j) == P0_expanded(i, j) - P_ij;
-        prob.Constraints.(['flow_constraint_Q_' num2str(i) '_' num2str(j)]) = ...
-            Q(i, j) == Q0_expanded(i, j) - Q_ij;
-        prob.Constraints.(['flow_constraint_' num2str(i) '_' num2str(j)]) = ...
-            h_linear(P(i, j), Q(i, j), V(i, j), LrtTap_expanded(i, j), SvrTap_expanded(i, j)) == 0;
+        prob.Constraints.(['flow_constraint_P_' num2str(t) '_' num2str(j)]) = ...
+            P(t, j) == P0_expanded(t, j) - P_ij;
+        prob.Constraints.(['flow_constraint_Q_' num2str(t) '_' num2str(j)]) = ...
+            Q(t, j) == Q0_expanded(t, j) - Q_ij;
+        prob.Constraints.(['flow_constraint_' num2str(t) '_' num2str(j)]) = ...
+            h_linear(P(t, j), Q(t, j), V(t, j), LrtTap_expanded(t, j), SvrTap_expanded(t, j)) == 0;
+    end
+end
+%}
+
+% 式(12),(13)
+prob.Constraints.PChmin=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PChmax=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PDChmin=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PDChmax=optimconstr(Opt.nTime,nCharger);
+for t=1:Opt.nTime
+    for i=1:nCharger
+        prob.Constraints.PChmin(t,i) = charPCh(t,i) >= 0;
+        prob.Constraints.PChmax(t,i) = charPCh(t,i) <= charPDchU(t,i) * Charger.Smax;
+        prob.Constraints.PChmin(t,i) = charPDch(t,i) >= 0;
+        prob.Constraints.PChmax(t,i) = charPCh(t,i) <= (1-charPDchU(t,i)) * Charger.Smax;
     end
 end
 
+% 式(14) 線形近似
+prob.Constraints.PQbalance1=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PQbalance2=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PQbalance3=optimconstr(Opt.nTime,nCharger);
+prob.Constraints.PQbalance4=optimconstr(Opt.nTime,nCharger);
+for t=1:Opt.nTime
+    for i=1:nCharger
+        prob.Constraints.PQbalance1(t,i) = charQInj(t,i) - Smax + (charPCh(t,i)+charPDch(t,i)) <= 0;
+        prob.Constraints.PQbalance1(t,i) = charQInj(t,i) + Smax - (charPCh(t,i)+charPDch(t,i)) <= 0;
+        prob.Constraints.PQbalance1(t,i) = charQInj(t,i) - Smax - (charPCh(t,i)+charPDch(t,i)) <= 0;
+        prob.Constraints.PQbalance1(t,i) = charQInj(t,i) + Smax + (charPCh(t,i)+charPDch(t,i)) <= 0;
+    end
+end
 
 
 
