@@ -9,3 +9,6 @@ MATLAB_haiden/CREST126.mat
 MATLAB_haiden/result/
 **/*.asv
 /memo4.m
+/dem/
+*.mat
+*.csv
