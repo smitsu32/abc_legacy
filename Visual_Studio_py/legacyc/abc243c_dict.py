@@ -1,28 +1,25 @@
 n=int(input())
-xy=[]
+X,Y=[0]*n,[0]*n
 for i in range(n):
-    x,y=map(int,input().split())
-    xy.append([x,y])
+    X[i],Y[i]=map(int,input().split())
 s=input()
 
-r,l=dict(),dict()       # r[y]=min(x), l[y]=max(x) として2変数を管理, inがO(1)
-
+yl,yr=dict(),dict()
 for i in range(n):
+    x,y=X[i],Y[i]
     if s[i]=='R':
-        if xy[i][1] in l and l[xy[i][1]]>xy[i][0]:
-            print('Yes')
-            exit()
-        elif xy[i][1] in r:
-            r[xy[i][1]]=min(r[xy[i][1]],xy[i][0])
+        if y not in yl:
+            yl[y]=x
         else:
-            r[xy[i][1]]=xy[i][0]
+            yl[y]=min(yl[y],x)
     else:
-        if xy[i][1] in r and r[xy[i][1]]<xy[i][0]:
-            print('Yes')
-            exit()
-        elif xy[i][1] in l:
-            l[xy[i][1]]=max(l[xy[i][1]],xy[i][0])
+        if y not in yr:
+            yr[y]=x
         else:
-            l[xy[i][1]]=xy[i][0]
-            
+            yr[y]=max(yr[y],x)
+
+for y in yl:
+    if y in yr and yl[y]<yr[y]:
+        print('Yes')
+        exit(0)
 print('No')
