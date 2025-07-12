@@ -1,26 +1,24 @@
-from collections import deque
-q=int(input())
+n,q=map(int,input().split())
+a=list(map(int,input().split()))
 
-d=deque()
-for _ in range(q):
-    qu=input().split()
-    if qu[0] == '1':
-        c,x=int(qu[1]), int(qu[2])
-        d.append((c,x))
+b=[0]*(n+3) # 0:white, 1:black
+ans=0
+for ii in range(q):
+    i=a[ii]
+    if b[i]==0:
+        if b[i-1]==1 and b[i+1]==1:
+            ans-=1
+        elif b[i-1]==1 or b[i+1]==1:
+            ans=ans
+        else:
+            ans+=1
+        b[i]=1
     else:
-        k=int(qu[1])
-        ans=0
-        while True:
-            c,x=d.popleft()
-            if c>k:
-                ans+=k*x
-                d.appendleft((c-k, x))
-                print(ans)
-                break
-            elif c==k:
-                ans+=k*x
-                print(ans)
-                break
-            else:
-                ans+=c*x
-                k-=c
+        if b[i-1]==1 and b[i+1]==1:
+            ans+=1
+        elif b[i-1]==1 or b[i+1]==1:
+            ans=ans
+        else:
+            ans-=1
+        b[i]=0
+    print(ans)

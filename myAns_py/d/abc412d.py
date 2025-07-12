@@ -1,29 +1,24 @@
-from itertools import combinations
+t=int(input())
 
-n,m=map(int, input().split())
-g=[set() for _ in range(n)]
-for _ in range(m):
-    u,v=map(int, input().split())
-    u-=1; v-=1
-    if u>v: u,v=v,u
-    g[u].add(v) #上三角行列
-
-al=[] # すべての辺
-for i in range(n-1):
-    for j in range(i+1,n):
-        al.append((i,j))
-
-ans=10**18
-for p in combinations(al,n): # 答えの辺の組み合わせを全試し
-    ed=[0]*n # 辺の次数
-    gnow=0 # 元からあった辺の数
-    for u,v in p:
-        ed[u]+=1
-        ed[v]+=1
-        if v in g[u]:
-            gnow+=1
+for _ in range(t):
+    n=int(input())
+    a=list(map(int,input().split()))
     
-    if all(i==2 for i in ed): # すべての頂点のグラフの次数が2なら
-        ansi=n+m-2*gnow # 追加＋削除辺 - 元の辺*2
-        ans=min(ans,ansi)
-print(ans)
+    b=len(set(a))
+    
+    if b==1: # 全て同じ値
+        print('Yes')
+    elif b==2 and min(a.count(a[0]),a.count(-a[0]))==n//2: # 交互
+        print('Yes')
+    else:
+        a.sort(key=lambda x: abs(x)) # 絶対値ソート
+        
+        f=True
+        for i in range(n-2):
+            if a[i]*a[i+2]!=a[i+1]**2:
+                f=False
+                break
+        if f:
+            print('Yes')
+        else:
+            print('No')
