@@ -1,24 +1,29 @@
-n,q=map(int,input().split())
-a=list(map(int,input().split()))
+a=int(input())
+n=int(input())
+m=len(str(n))
 
-b=[0]*(n+3) # 0:white, 1:black
-ans=0
-for ii in range(q):
-    i=a[ii]
-    if b[i]==0:
-        if b[i-1]==1 and b[i+1]==1:
-            ans-=1
-        elif b[i-1]==1 or b[i+1]==1:
-            ans=ans
-        else:
-            ans+=1
-        b[i]=1
+def check(i,a):
+    num=[]
+    while i>0:
+        num.append(i%a)
+        i//=a
+    
+    if num==num[::-1]:
+        return True
     else:
-        if b[i-1]==1 and b[i+1]==1:
-            ans+=1
-        elif b[i-1]==1 or b[i+1]==1:
-            ans=ans
-        else:
-            ans-=1
-        b[i]=0
-    print(ans)
+        return False
+
+ans=0
+for l in range(1,10**6):
+    ls=str(l)
+    d1=int(ls+ls[::-1])
+    if d1<=n and check(d1,a):
+        ans+=d1
+    
+    d2=int(ls+ls[:-1][::-1])
+    if d2<=n and check(d2,a):
+        ans+=d2
+    elif d2>n:
+        break
+
+print(ans)

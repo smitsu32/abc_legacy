@@ -1,37 +1,37 @@
-import sys
-sys.setrecursionlimit(10**7)
-# import pypyjit
-# pypyjit.set_param('max_unroll_recursion=-1')
+n,m=map(int,input().split())
+x=list(map(int,input().split()))
+x.sort()
 
-n,q=map(int,input().split())
+g=[]
+for i in range(n-1):
+    g.append(x[i+1]-x[i]) # 差
 
-S=[(-1, "")] # 文字列で保存
-P=[0]*n # id
-now=1 # 現在の編集id
-sur=0 # サーバーid
+if n==m:
+    print(0)
+    exit()
 
-for _ in range(q):
-    qu=input().split()
-    if qu[0]=='1':
-        p=int(qu[1])
-        P[p-1]=sur
-    elif qu[0]=='2':
-        p=int(qu[1])
-        s=qu[2]
-        S.append((P[p-1], s))  # 文字列で保存
-        P[p-1]=now
-        now+=1
+l,r=-1,10**12+1
+while abs(l-r)>1:
+    mid=(l+r)//2
+    count=0
+    for i in g:
+        if i<=mid:
+            count+=1
+    
+    if count>=n-m: # n-m 個に分けられるなら
+        r=mid
     else:
-        p=int(qu[1])
-        sur=P[p-1] # サーバーidを更新 昔のものはSに残る
+        l=mid
 
-def f(i): # サーバーを出力する→最後からidをたどって復元
-    r=[] # サーバー
-    j=i
-    while j!=-1: # たどれる限りたどる
-        p,s = S[j] # (親id, 文字列)
-        r.append(s)
-        j=p
-    return "".join(reversed(r))
+ans=0
+for i in range(len(g)):
+    if g[i]<r:
+        ans+=g[i]
+ansm=0
+for i in range(len(g)):
+    if g[i]<r:
+        ansm+=1
 
-print(f(sur))
+ans+=(n-m-ansm)*r
+
+print(ans)
