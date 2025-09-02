@@ -12,3 +12,10 @@ MATLAB_haiden/result/
 /dem/
 *.mat
 *.csv
+
+# Claude Code files and directory
+claude-code/
+CLAUDE.md
+package.json
+package-lock.json
+node_modules/
