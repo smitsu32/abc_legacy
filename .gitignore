@@ -4,6 +4,8 @@ test2-2.py
 /memo.py
 /memo2.py
 /memo3.py
+/main.cpp
+/main.exe
 *.md
 MATLAB_haiden/CREST126.mat
 MATLAB_haiden/result/
