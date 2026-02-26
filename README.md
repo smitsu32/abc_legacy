@@ -1,4 +1,4 @@
-# abc_legacy　- AtCoder ABC 過去問回答リポジトリ
+# abc_reyobi_Python　- AtCoder ABC 過去問回答リポジトリ
 
 このリポジトリは、競技プログラミングサイトAtCoder の「ABC（AtCoder Beginner Contest）」における過去の自分の回答を整理・管理するためのものです。
 
